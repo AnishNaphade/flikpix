@@ -1,0 +1,52 @@
+.skeleton-card {
+  flex-shrink: 0;
+  width: var(--card-width);
+}
+
+.skeleton-card__poster {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-md);
+}
+
+.skeleton-carousel {
+  padding: var(--space-md) 0;
+}
+
+.skeleton-carousel__title {
+  width: 200px;
+  height: 24px;
+  margin-left: var(--content-padding);
+  margin-bottom: var(--space-md);
+}
+
+.skeleton-carousel__track {
+  display: flex;
+  gap: var(--carousel-gap);
+  padding: 0 var(--content-padding);
+  overflow: hidden;
+}
+
+.skeleton-hero {
+  width: 100%;
+  height: 85vh;
+  min-height: 500px;
+}
+
+.skeleton-detail__header {
+  width: 100%;
+  height: 300px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.skeleton-detail__body {
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.skeleton-detail__line {
+  height: 16px;
+  border-radius: 4px;
+}

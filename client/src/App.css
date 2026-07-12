@@ -1,0 +1,9 @@
+/* App Shell Styles */
+.app {
+  min-height: 100vh;
+  background: var(--bg-primary);
+}
+
+.app__main {
+  min-height: 100vh;
+}
