@@ -12,10 +12,16 @@ const pool = new Pool({
   connectionTimeoutMillis: 5000,
 });
 
+// Catch background pool errors to prevent process crash
+pool.on('error', (err) => {
+  console.error('❌ Database pool error:', err.message);
+});
+
 // ─── Initialize Tables ──────────────────────────────────────
 async function initDB() {
-  const client = await pool.connect();
+  let client;
   try {
+    client = await pool.connect();
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -47,9 +53,10 @@ async function initDB() {
     `);
     console.log('✅ Database tables initialized');
   } catch (err) {
-    console.error('❌ Database initialization error:', err.message);
+    console.error('❌ Database connection error:', err.message);
+    console.warn('⚠️ Server will run in degraded mode (TMDB API proxy enabled; PostgreSQL auth/lists disabled until DB is available).');
   } finally {
-    client.release();
+    if (client) client.release();
   }
 }
 

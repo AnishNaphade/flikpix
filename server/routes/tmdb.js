@@ -66,11 +66,16 @@ function tmdbFetch(endpoint, queryParams = {}) {
 
   function attempt(retryCount) {
     return new Promise((resolve, reject) => {
+      let isRetrying = false;
+      
       const req = https.get({
         hostname: TMDB_BASE_HOST,
         path: path,
         agent: agent,
-        headers: { 'Accept': 'application/json' },
+        headers: { 
+          'Accept': 'application/json',
+          'User-Agent': 'FlikpixApp/1.0 (Node.js)'
+        },
         timeout: 10000, // 10 second timeout
       }, (res) => {
         let data = '';
@@ -91,6 +96,9 @@ function tmdbFetch(endpoint, queryParams = {}) {
       });
 
       req.on('error', (err) => {
+        if (isRetrying) return;
+        isRetrying = true;
+        
         if (retryCount < MAX_RETRIES) {
           const delay = Math.pow(2, retryCount) * 300; // 300ms, 600ms, 1200ms
           console.warn(`TMDB retry ${retryCount + 1}/${MAX_RETRIES} for ${endpoint} after ${delay}ms (${err.message})`);
@@ -103,16 +111,8 @@ function tmdbFetch(endpoint, queryParams = {}) {
       });
 
       req.on('timeout', () => {
-        req.destroy();
-        if (retryCount < MAX_RETRIES) {
-          const delay = Math.pow(2, retryCount) * 300;
-          console.warn(`TMDB timeout retry ${retryCount + 1}/${MAX_RETRIES} for ${endpoint}`);
-          setTimeout(() => {
-            attempt(retryCount + 1).then(resolve, reject);
-          }, delay);
-        } else {
-          reject(new Error(`TMDB request timed out after ${MAX_RETRIES} retries`));
-        }
+        // This will trigger req.on('error') with "socket hang up"
+        req.destroy(new Error('timeout'));
       });
     });
   }
