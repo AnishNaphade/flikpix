@@ -115,19 +115,20 @@ export const listsAPI = {
 };
 
 // ─── TMDB Image Helpers ──────────────────────────────────────
-const IMG_BASE = 'https://image.tmdb.org/t/p';
-
 export const getImageUrl = (path, size = 'w500') => {
   if (!path) return null;
-  return `${IMG_BASE}/${size}${path}`;
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${API_BASE}/tmdb/image/${size}${cleanPath}`;
 };
 
 export const getBackdropUrl = (path, size = 'original') => {
   if (!path) return null;
-  return `${IMG_BASE}/${size}${path}`;
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${API_BASE}/tmdb/image/${size}${cleanPath}`;
 };
 
 export const getProfileUrl = (path, size = 'w185') => {
   if (!path) return null;
-  return `${IMG_BASE}/${size}${path}`;
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${API_BASE}/tmdb/image/${size}${cleanPath}`;
 };

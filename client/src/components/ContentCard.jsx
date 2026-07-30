@@ -5,6 +5,7 @@ import './ContentCard.css';
 
 export default function ContentCard({ item, onCardClick, onAddToList, isTop10, style }) {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
   if (!item) return null;
@@ -28,7 +29,7 @@ export default function ContentCard({ item, onCardClick, onAddToList, isTop10, s
     >
       {/* Poster Image Container */}
       <div className="content-card__poster-container">
-        {!imageLoaded && <div className="content-card__skeleton skeleton" />}
+        {!imageLoaded && !imageError && <div className="content-card__skeleton skeleton" />}
         
         {isTop10 && (
           <div className="content-card__top10-badge">
@@ -37,17 +38,20 @@ export default function ContentCard({ item, onCardClick, onAddToList, isTop10, s
           </div>
         )}
 
-        {posterUrl ? (
+        {posterUrl && !imageError ? (
           <img
             src={posterUrl}
             alt={title}
+            referrerPolicy="no-referrer"
             className={`content-card__img ${imageLoaded ? 'content-card__img--loaded' : ''}`}
             onLoad={() => setImageLoaded(true)}
+            onError={() => setImageError(true)}
             loading="lazy"
           />
         ) : (
           <div className="content-card__no-poster">
             <span>🎬</span>
+            <span className="content-card__no-poster-title">{title}</span>
           </div>
         )}
 

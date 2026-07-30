@@ -7,6 +7,7 @@ export default function HeroBanner({ items = [], onMoreInfo }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   // Filter items with backdrop images
   const validItems = items.filter(item => item.backdrop_path).slice(0, 8);
@@ -25,6 +26,7 @@ export default function HeroBanner({ items = [], onMoreInfo }) {
     if (index === currentIndex || isTransitioning) return;
     setIsTransitioning(true);
     setImageLoaded(false);
+    setImageError(false);
     setTimeout(() => {
       setCurrentIndex(index);
       setIsTransitioning(false);
@@ -50,12 +52,14 @@ export default function HeroBanner({ items = [], onMoreInfo }) {
     <section className="hero-banner" id="hero-banner">
       {/* Background Image */}
       <div className={`hero-banner__bg ${isTransitioning ? 'hero-banner__bg--fading' : ''}`}>
-        {backdropUrl && (
+        {backdropUrl && !imageError && (
           <img
             src={backdropUrl}
             alt={title}
+            referrerPolicy="no-referrer"
             className={`hero-banner__img ${imageLoaded ? 'hero-banner__img--loaded' : ''}`}
             onLoad={() => setImageLoaded(true)}
+            onError={() => setImageError(true)}
           />
         )}
       </div>

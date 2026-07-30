@@ -74,7 +74,7 @@ function tmdbFetch(endpoint, queryParams = {}) {
         agent: agent,
         headers: { 
           'Accept': 'application/json',
-          'User-Agent': 'FlikpixApp/1.0 (Node.js)'
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
         },
         timeout: 10000, // 10 second timeout
       }, (res) => {
@@ -119,6 +119,52 @@ function tmdbFetch(endpoint, queryParams = {}) {
 
   return attempt(0);
 }
+
+// ─── Image Proxy ─────────────────────────────────────────────
+/**
+ * GET /api/tmdb/image/:size/*
+ * Proxies TMDB images through backend to bypass client-side DNS/ISP blocks & CORS.
+ */
+router.get('/image/:size/*', (req, res) => {
+  const { size } = req.params;
+  const imagePath = req.params[0];
+
+  if (!imagePath) {
+    return res.status(400).json({ error: 'Image path is required.' });
+  }
+
+  const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+  const tmdbUrl = `https://image.tmdb.org/t/p/${size}${cleanPath}`;
+
+  const imageReq = https.get(tmdbUrl, {
+    agent,
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+      'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+    },
+    timeout: 10000
+  }, (tmdbRes) => {
+    if (tmdbRes.statusCode !== 200) {
+      tmdbRes.resume();
+      return res.status(tmdbRes.statusCode).end();
+    }
+
+    res.setHeader('Content-Type', tmdbRes.headers['content-type'] || 'image/jpeg');
+    res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
+    tmdbRes.pipe(res);
+  });
+
+  imageReq.on('timeout', () => {
+    imageReq.destroy(new Error('timeout'));
+  });
+
+  imageReq.on('error', (err) => {
+    console.error('Image proxy error:', err.message);
+    if (!res.headersSent) {
+      res.status(502).end();
+    }
+  });
+});
 
 // ─── Trending ────────────────────────────────────────────────
 /**
